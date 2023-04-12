@@ -1,25 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
+import './App.module.scss';
+import styles from './App.module.scss';
+import classNames from 'classnames/bind';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Login from './pages/Login/Login';
+import Home from './pages/Home/Home';
+import Register from './pages/Register/Register';
+import { AuthContextProvider } from './context/AuthContext';
+import ProtectedRoute from './context/ProtectedRoute';
+
+const cx = classNames.bind(styles);
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <div className={cx("App")}>
+            <AuthContextProvider>
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/" element={<Login />} />
+                        <Route path='/register' element={<Register />} />
+                        <Route
+                            path="/home"
+                            element={
+                                <ProtectedRoute>
+                                    <Home />
+                                </ProtectedRoute>
+                            }
+                        />
+                    </Routes>
+                </BrowserRouter>
+            </AuthContextProvider>
+        </div>
+    )
 }
 
 export default App;

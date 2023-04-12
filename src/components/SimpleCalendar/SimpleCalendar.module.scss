@@ -1,0 +1,33 @@
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    &__content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 28px;
+    }
+
+    &__calendar {
+        display: flex;
+        margin: 0 auto;
+    }
+}
+
+.button {
+    background: #57B1E5;
+    box-shadow: rgba(149, 157, 165, 0.7) 4px 8px 24px;
+
+    &:hover {
+        color: #000 !important;
+        opacity: 0.8;
+    }
+}
+
+.events {
+    padding-left: 4px;
+    list-style: none;
+}
