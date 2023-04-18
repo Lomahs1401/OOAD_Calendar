@@ -1,105 +1,94 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button, Calendar, Badge } from 'antd';
 import styles from './SimpleCalendar.module.scss'
 import classNames from 'classnames/bind'
 import AddAppointment from '../AddAppointment/AddAppointment';
 import { GoPlus } from 'react-icons/go';
-import { UserAuth } from '../../context/AuthContext';
+import { auth, db } from '../../firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import dayjs from 'dayjs';
 
 const cx = classNames.bind(styles);
 
-const SimpleCalendar = () => {
+const SimpleCalendar = ({ listAppointments }) => {
+  const [openModal, setOpenModal] = useState(false);
+  const [currentDate, setCurrentDate] = useState(dayjs());
 
-    const today = new Date();
-    const { user } = UserAuth();
-    const [data, setData] = useState(localStorage.getItem('data') ? JSON.parse(localStorage.getItem('data')) : []);
-    const [openModal, setOpenModal] = useState(false);
-    const [currentDate, setCurrentDate] = useState(today.toISOString().split('T')[0].replace(/-/g, '-'));
+  // Handle click "Add Appointment" button
+  const showAddAppointment = () => {
+    setOpenModal(true);
+  };
 
-    const showAddAppointment = () => {
-        setOpenModal(true);
-    };
+  // Handle click cell of calendar
+  const handleClickCell = (item) => {
+    // showReminder(item);
+  }
 
-    const getListData = (value) => {
-        let listData = [];
-        data.map((item) => {
-            if (
-                item.date === value.format('YYYY-MM-DD') && 
-                item.username === user.displayName && 
-                item.email === user.email
-            ) {
-                listData = [...listData, item];
-            }
-        })
-        return listData || [];
-    };
-    
-    const getMonthData = (value) => {
-        if (value.month() === 8) {
-            return 1394;
+  const getListData = (value) => {
+    let listData = [];
+
+    if (listAppointments) {
+      listAppointments.map((appointment) => {
+        const startTime = appointment.startTime.toDate() ;
+        const cellTime = new Date(value);
+        if (startTime.toDateString() === cellTime.toDateString()) {
+          listData = [...listData, appointment];
         }
-    };
-    
-    const cellRender = (current, info) => {
-        if (info.type === 'date') {
-            const listData = getListData(current);
-            return (
-                <ul className={cx("events")}>
-                    {listData.map((item, index) => (
-                        <li key={index}>
-                            <Badge status={'success'} text={item.title} />
-                        </li>
-                    ))}
-                </ul>
-            );
-        } 
-        if (info.type === 'month') {
-            const num = getMonthData(current);
-            return num ? (
-                <div className="notes-month">
-                    <section>{num}</section>
-                    <span>Backlog number</span>
-                </div>
-            ) : null;
-        }
-        return info.originNode;
-    };
-
-    const onPanelChange = (value, mode) => {
-        console.log(value.format('YYYY-MM-DD'), mode);
-    };
-
-    const handleChange = (value) => {
-        console.log(currentDate);
-        setCurrentDate(value.format('YYYY-MM-DD'))
+      })
     }
 
+    return listData || [];
+  };
+
+  const cellRender = (current) => {
+    const listData = getListData(current);
     return (
-        <div className={cx("wrapper")}>
-            <div className={cx("wrapper__content")}>
-                <h1 style={{fontSize: 18}}>Appointment Calendar</h1>
-                <Button
-                    className={cx("button")}
-                    onClick={showAddAppointment}
-                >
-                    <GoPlus style={{padding: '2px 4px 0 0'}} />
-                    Add Appointment
-                </Button>
-                <AddAppointment 
-                    date={currentDate} 
-                    openModal={openModal} 
-                    setOpenModal={setOpenModal} 
-                />
-            </div>
-            <div className={cx("wrapper__calendar")}>
-                <Calendar 
-                    cellRender={cellRender} 
-                    onChange={handleChange}
-                    onPanelChange={onPanelChange} 
-                />
-            </div>
-        </div>
-    )
+      <ul className={cx("events")}>
+        {listData.map((item, index) => (
+          <li key={index} onClick={() => handleClickCell(item)}>
+            <Badge 
+              color='#F5F3C1'
+              status={'success'} 
+              text={item.title} 
+              className={cx("badge")}
+            />
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
+  const handleChange = (value) => {
+    const date = dayjs(value);
+    setCurrentDate(date)
+  }
+
+  return (
+    <div className={cx("wrapper")}>
+      <div className={cx("wrapper__content")}>
+        <h1 style={{ fontSize: 18 }}>Appointment Calendar</h1>
+        <Button
+          className={cx("button")}
+          onClick={showAddAppointment}
+        >
+          <GoPlus style={{ padding: '2px 4px 0 0' }} />
+          Add Appointment
+        </Button>
+        <AddAppointment
+          currentDate={currentDate}
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+        />
+      </div>
+      <div className={cx("wrapper__calendar")}>
+        <Calendar
+          cellRender={cellRender}
+          onChange={handleChange}
+          value={currentDate}
+        />
+      </div>
+    </div>
+  )
 }
 
 export default SimpleCalendar;

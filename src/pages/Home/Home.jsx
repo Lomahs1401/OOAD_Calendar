@@ -10,12 +10,15 @@ import classNames from 'classnames/bind'
 import { RxHamburgerMenu } from 'react-icons/rx'
 import { IoMdCalendar, IoIosNotifications } from 'react-icons/io'
 import { FiLogOut } from 'react-icons/fi'
+import { FaUser } from 'react-icons/fa'
 import { Header, Content } from 'antd/es/layout/layout'
 import Sider from 'antd/es/layout/Sider';
 import SimpleCalendar from '../../components/SimpleCalendar/SimpleCalendar';
 import Reminder from '../../components/Reminder/Reminder';
 import { useNavigate } from 'react-router-dom';
 import { UserAuth } from '../../context/AuthContext';
+import { auth, db } from '../../firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 const cx = classNames.bind(styles);
 
@@ -26,8 +29,9 @@ const Home = () => {
 
   const [collpased, setCollapsed] = useState(false);
   const [currentMenu, setCurrentMenu] = useState(CALENDAR);
-
-  const [data, setData] = useState(localStorage.getItem('data') ? JSON.parse(localStorage.getItem('data')) : [])
+  const [appointments, setAppointments] = useState([]);
+  const [isAddNewAppointment, setIsAddNewAppointment] = useState(false);
+  const appointmentsCollectionRef = collection(db, "appointments");
 
   const navigate = useNavigate();
 
@@ -58,27 +62,33 @@ const Home = () => {
     },
   ]
 
+  useEffect(() => {
+    const getAppointments = async () => {
+      const q = query(appointmentsCollectionRef, where('username', '==', auth.currentUser?.displayName))
+
+      const querySnapshot = await getDocs(q);
+
+      let appointments = []  
+      querySnapshot.forEach((doc) => {
+        appointments.push({ ...doc.data(), id : doc.id });
+      })
+      setAppointments(appointments);
+    };
+    
+    getAppointments();
+    console.log(appointments);
+    console.log("Chạy đi cu")
+
+  }, [])
+
   const handleLogout = async () => {
     try {
       await logout()
       navigate('/')
     } catch (e) {
-      console.log(e);
       message.error('Oops! Try again..')
     }
   }
-
-  // useEffect(() => {
-  //   if (user !== null) {
-  //     localStorage.setItem('username', user.displayName);
-  //     localStorage.setItem('email', user.email);
-  //   }
-
-  //   // return (() => {
-  //   //   localStorage.removeItem('username');
-  //   //   localStorage.removeItem('email');
-  //   // })
-  // }, [])
 
   return (
     <Layout className={cx("container")}>
@@ -93,16 +103,29 @@ const Home = () => {
             Appointment Calendar App
           </div>
         </div>
+        <div className={cx("welcome")}>
+          <FaUser />
+          <h1>{auth.currentUser?.displayName}</h1>
+        </div>  
       </Header>
       <Layout>
-        <Sider theme='light' collapsed={collpased}>
-          <Menu mode='inline' onClick={handleClickMenu} selectedKeys={[currentMenu]} items={items} />
+        <Sider 
+          theme='light' 
+          collapsed={collpased}
+          className={cx("sider")}
+        >
+          <Menu 
+            mode='inline' 
+            onClick={handleClickMenu} 
+            selectedKeys={[currentMenu]} 
+            items={items} 
+          />
         </Sider>
         <Content className={cx("content")}>
           <Row>
             {(() => {
-              if (currentMenu === CALENDAR) return <SimpleCalendar />
-              else if (currentMenu === MANAGE_REMINDER) return <Reminder listAppointments={data} />
+              if (currentMenu === CALENDAR) return <SimpleCalendar listAppointments={appointments} />
+              else if (currentMenu === MANAGE_REMINDER) return <Reminder listAppointments={appointments} />
               else {
                 handleLogout()
               }

@@ -5,9 +5,10 @@ import logo from '../../img/logo.png'
 import ImageSlider from '../../components/ImageSlider/ImageSlider'
 import { Form, Button, Input, message } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
-import { auth } from '../../firebase'
+import { auth, db } from '../../firebase'
 import { updateProfile } from 'firebase/auth'
 import { UserAuth } from '../../context/AuthContext'
+import { addDoc, collection } from 'firebase/firestore'
 
 const cx = classNames.bind(styles);
 
@@ -29,6 +30,7 @@ const Register = () => {
   };
 
   const { createUser } = UserAuth();
+  const usersCollectionRef = collection(db, "users");
 
   const [form] = Form.useForm();
 
@@ -38,6 +40,7 @@ const Register = () => {
     const { email, password } = values;
     const username = form.getFieldValue('username');
     try {
+      await addDoc(usersCollectionRef, {username, email, password});
       await createUser(email, password);
       const currentUser = auth.currentUser;
       updateProfile(currentUser, {displayName: username});
@@ -57,7 +60,7 @@ const Register = () => {
   return (
     <div className={cx("wrapper")}>
       <div className={cx("wrapper__left")}>
-        <ImageSlider slides={slides} />
+        <ImageSlider slides={slides} parentWidth={600} />
       </div>
       <div className={cx("wrapper__right")}>
         <div className={cx("register-container")}>

@@ -9,6 +9,7 @@ import { Form, Button, Input, Divider, Modal, message } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import Popup from '../../components/Popup/Popup';
 import { UserAuth } from '../../context/AuthContext';
+import { auth } from '../../firebase';
 
 const cx = classNames.bind(styles);
 
@@ -53,7 +54,7 @@ const Login = () => {
     const { email, password } = values;
     try {
       await signIn(email, password);
-      message.success('Login successful!');
+      message.success(`Welcome back ${auth.currentUser.displayName}!`);
       navigate('/home');
     } catch(e) {
       console.log(e);
@@ -168,7 +169,7 @@ const Login = () => {
         </div>
       </div>
       <div className={cx("wrapper__right")}>
-        <ImageSlider slides={slides} />
+        <ImageSlider slides={slides} parentWidth={600} />
       </div>
       <Modal
         title="Tính năng đang phát triển"

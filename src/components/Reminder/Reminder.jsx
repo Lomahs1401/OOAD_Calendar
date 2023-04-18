@@ -16,14 +16,14 @@ const Reminder = ({ listAppointments }) => {
     setReminderData(appointment)
   }
 
-  console.log(listAppointments);
-
   return (
     <div className={cx('reminder')}>
       <h3 style={{textAlign: 'center', fontSize: 40}}>Reminder</h3>
       <div className={cx('reminder-list')}>
         {listAppointments.map((appointment, index) => {
           if (appointment.email === user.email) {
+            const startTime = appointment.startTime.toDate().toDateString();
+            console.log(startTime);
             return (
               <div 
                 className={cx('reminder-item')} 
@@ -31,7 +31,7 @@ const Reminder = ({ listAppointments }) => {
                 onClick={() => showReminder(appointment)}
               >
                 <div className={cx('reminder-item__name')}>{appointment.title}</div>
-                <div className={cx('reminder-item__date')}>{appointment.date}</div>
+                <div className={cx('reminder-item__date')}>{startTime}</div>
               </div>
             )
           };

@@ -15,13 +15,6 @@ function ReminderDetail({ data, openModal, setOpenModal }) {
   };
 
   const draggleRef = useRef(null);
-
-  const startTime = new Date(data.startTime)
-  const endTime = new Date(data.endTime)
-
-  const startTimeStr = startTime.toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })
-  const endTimeStr = endTime.toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })
-
   // ---------------------------      Modal Draggable      ---------------------------
   const [disabled, setDisabled] = useState(false);
   const [bounds, setBounds] = useState({
@@ -81,12 +74,9 @@ function ReminderDetail({ data, openModal, setOpenModal }) {
     >
       <Descriptions>
         <Descriptions.Item label="Name">{data.title}</Descriptions.Item>
-        <Descriptions.Item label="Date">{data.date}</Descriptions.Item>
         <Descriptions.Item label="Location">{data.location}</Descriptions.Item>
         <Divider/>
         <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
-        <Descriptions.Item label="Start Time">{startTimeStr}</Descriptions.Item>
-        <Descriptions.Item label="End Time">{endTimeStr}</Descriptions.Item>
         <Descriptions.Item label="Users">{user.displayName}</Descriptions.Item>
       </Descriptions>
     </Modal>
